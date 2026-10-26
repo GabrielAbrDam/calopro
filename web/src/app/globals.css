@@ -1,0 +1,117 @@
+@import "tailwindcss";
+
+/* Côte d'Émeraude : granit, écume, émeraude, jaune balise. */
+@theme {
+  --color-ecume: #f2f5f4;
+  --color-blanc: #ffffff;
+  --color-granit: #22303a;
+  --color-granit-doux: #56656d;
+  --color-trait: #d3dcda;
+  --color-sable: #e7e0d1;
+  --color-emeraude: #0b6b5c;
+  --color-emeraude-fonce: #074a40;
+  --color-emeraude-clair: #d7ebe6;
+  --color-balise: #f2b705;
+  --color-balise-clair: #fdf1c7;
+  --color-alerte: #b42318;
+  --color-alerte-clair: #fbe4e1;
+
+  --font-sans: var(--font-archivo), system-ui, sans-serif;
+}
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  background: var(--color-ecume);
+  color: var(--color-granit);
+  font-family: var(--font-sans);
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Titres : Archivo resserré et dense, comme la signalétique portuaire. */
+.titre {
+  font-stretch: 72%;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  line-height: 1.02;
+}
+.titre-moyen {
+  font-stretch: 85%;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-balise);
+  outline-offset: 2px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 48px;
+  padding: 0 1.25rem;
+  border-radius: 999px;
+  font-weight: 600;
+  transition: background-color 0.15s, transform 0.1s;
+}
+.btn:active {
+  transform: scale(0.98);
+}
+.btn-primaire {
+  background: var(--color-emeraude);
+  color: white;
+}
+.btn-primaire:hover {
+  background: var(--color-emeraude-fonce);
+}
+.btn-secondaire {
+  background: white;
+  color: var(--color-granit);
+  box-shadow: inset 0 0 0 1.5px var(--color-trait);
+}
+.btn-secondaire:hover {
+  box-shadow: inset 0 0 0 1.5px var(--color-granit-doux);
+}
+.btn-danger {
+  background: var(--color-alerte);
+  color: white;
+}
+
+.champ {
+  width: 100%;
+  min-height: 48px;
+  border-radius: 12px;
+  border: 1.5px solid var(--color-trait);
+  background: white;
+  padding: 0.65rem 0.9rem;
+  font-size: 1rem;
+}
+.champ:focus {
+  border-color: var(--color-emeraude);
+  outline: none;
+}
+
+.prose-courte p + p {
+  margin-top: 0.75rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: white;
+  }
+}
