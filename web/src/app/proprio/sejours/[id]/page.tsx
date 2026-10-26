@@ -5,12 +5,15 @@ import { dateLong, dateTime, eur } from "@/lib/format";
 import { Card, Page, PageHeader } from "@/components/ui";
 import { IconCheck, IconFile } from "@/components/icons";
 import { RegenerateLink } from "./regenerate-link";
+import { CopyLink } from "@/components/copy-link";
+import Link from "next/link";
 import { IncidentRow } from "../incident-row";
 
 export const metadata = { title: "Séjour" };
 
-export default async function SejourDetail({ params }: { params: Promise<{ id: string }> }) {
+export default async function SejourDetail({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ lien?: string }> }) {
   const s = await getStay((await params).id);
+  const newLink = (await searchParams).lien;
   if (!s) notFound();
   const [p, docs, incidents] = await Promise.all([getProperty(s.property_id), listStayDocuments(s.id), listIncidents({ stayId: s.id })]);
   const annexes = Object.entries(s.annexes);
@@ -22,6 +25,15 @@ export default async function SejourDetail({ params }: { params: Promise<{ id: s
         {dateLong(s.start_date)} → {dateLong(s.end_date)} · {eur(s.rent + s.charges)} CC
       </PageHeader>
       <div className="space-y-4 px-4">
+        {newLink && (
+          <div className="space-y-2 rounded-2xl bg-emeraude-clair p-4">
+            <p className="font-semibold text-emeraude-fonce">Séjour créé. Le lien « Mon séjour » vient de partir par mail.</p>
+            <CopyLink url={newLink} />
+            <Link href={newLink.replace(/^https?:\/\/[^/]+/, "")} className="btn btn-secondaire w-full">
+              Voir ce que voit le locataire
+            </Link>
+          </div>
+        )}
         <Card>
           <h2 className="titre-moyen text-xl">Lien « Mon séjour »</h2>
           <p className="mt-1 text-sm text-granit-doux">
@@ -69,7 +81,7 @@ export default async function SejourDetail({ params }: { params: Promise<{ id: s
               <option value="inventaire">Inventaire</option>
               <option value="diagnostics">Diagnostics</option>
             </select>
-            <input type="file" name="file" accept="application/pdf" required className="champ py-3" aria-label="Fichier PDF" />
+            <input type="file" name="file" accept="application/pdf" className="champ py-3" aria-label="Fichier PDF" />
             <button className="btn btn-secondaire w-full">Déposer le PDF</button>
           </form>
         </Card>

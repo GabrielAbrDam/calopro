@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState, useState } from "react";
 import { resendStayLink } from "./actions";
 
@@ -20,11 +21,20 @@ export function ResendLinkForm() {
         Votre adresse mail
       </label>
       <p className="mb-3 text-sm text-granit-doux">Celle du bail. On vous renvoie votre lien « Mon séjour ».</p>
-      <input id="email" name="email" type="email" required autoComplete="email" className="champ" />
+      <input id="email" name="email" type="email" autoComplete="email" defaultValue="lea.morvan@exemple.fr" className="champ" />
       <button type="submit" disabled={pending} className="btn btn-primaire mt-3 w-full">
         {pending ? "Envoi…" : "Recevoir mon lien"}
       </button>
-      {state && <p className="mt-3 text-sm text-emeraude-fonce" role="status">{state}</p>}
+      {state && (
+        <div className="mt-3 space-y-2" role="status">
+          <p className="text-sm text-emeraude-fonce">{state.message}</p>
+          {state.link && (
+            <Link href={state.link} className="btn btn-secondaire w-full">
+              Démo : ouvrir le séjour de Léa
+            </Link>
+          )}
+        </div>
+      )}
     </form>
   );
 }

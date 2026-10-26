@@ -34,7 +34,11 @@ export async function GuideView({ propertyId, withTabs = true }: { propertyId: s
           const group = sections.filter((s) => s.key === k);
           const eqs = equipment.filter((e) => EQUIPMENT_FOR[k]?.includes(e.kind));
           return (
-            <section key={k} id={k} className="scroll-mt-16 rounded-2xl bg-blanc p-4">
+            <section key={k} id={k} className="scroll-mt-16 overflow-hidden rounded-2xl bg-blanc p-4">
+              {k === "saint-malo" && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src="/photos/saint-malo-pieux.jpg" alt="Les brise-lames devant les remparts de Saint-Malo" className="-mx-4 -mt-4 mb-4 h-44 w-[calc(100%+2rem)] max-w-none object-cover" />
+              )}
               {group.map((s, i) => (
                 <div key={s.id} className={i ? "mt-4 border-t border-trait pt-4" : ""}>
                   <h2 className={i ? "font-semibold" : "titre-moyen text-2xl"}>{s.title}</h2>

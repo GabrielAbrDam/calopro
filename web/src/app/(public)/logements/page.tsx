@@ -24,7 +24,7 @@ export default async function Catalogue() {
           return (
             <li key={p.id}>
               <Link href={`/logements/${p.slug}`} className="block overflow-hidden rounded-2xl bg-blanc">
-                <PhotoTile room={p.photos[0].room} tone={p.photos[0].tone} className="h-48 rounded-none" />
+                <PhotoTile {...p.photos[0]} className="h-52 rounded-none" />
                 <div className="p-4">
                   <div className="flex items-start justify-between gap-3">
                     <div>

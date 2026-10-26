@@ -17,7 +17,7 @@ export default async function LogementsProprio() {
         {rows.map(({ p, free, eq }) => (
           <li key={p.id}>
             <Link href={`/proprio/logements/${p.id}`} className="flex gap-3 rounded-2xl bg-blanc p-3">
-              <PhotoTile room="" tone={p.photos[0].tone} className="size-20 shrink-0" />
+              <PhotoTile room="" tone={p.photos[0].tone} src={p.photos[0].src} className="size-20 shrink-0" />
               <div className="min-w-0 flex-1">
                 <p className="font-semibold">{p.name}</p>
                 <p className="text-sm text-granit-doux">

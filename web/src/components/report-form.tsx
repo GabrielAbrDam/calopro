@@ -65,7 +65,7 @@ export function ReportForm({
       )}
       <label className="block">
         <span className="mb-1 block font-semibold">Que se passe-t-il ?</span>
-        <textarea name="description" rows={4} required minLength={10} className="champ" placeholder="Depuis quand, ce que vous avez déjà essayé…" />
+        <textarea name="description" rows={4} className="champ" placeholder="Depuis quand, ce que vous avez déjà essayé… (vide = texte de démo)" />
       </label>
       <label className="block">
         <span className="mb-1 block font-semibold">Photos (3 au plus)</span>

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { ROLE_BAR_HEIGHT } from "@/lib/demo";
 
 export type Tab = { href: string; label: string; icon: React.ReactNode; exact?: boolean };
 
@@ -10,7 +11,8 @@ export function TabBar({ tabs }: { tabs: Tab[] }) {
   return (
     <nav
       aria-label="Navigation principale"
-      className="no-print fixed inset-x-0 bottom-0 z-30 border-t border-trait bg-blanc/95 backdrop-blur pb-[env(safe-area-inset-bottom)]"
+      style={{ bottom: ROLE_BAR_HEIGHT }}
+      className={`no-print fixed inset-x-0 z-30 border-t border-trait bg-blanc/95 backdrop-blur ${ROLE_BAR_HEIGHT ? "" : "pb-[env(safe-area-inset-bottom)]"}`}
     >
       <ul className="mx-auto flex max-w-xl">
         {tabs.map((t) => {

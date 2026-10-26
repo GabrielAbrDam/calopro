@@ -1,0 +1,8 @@
+# Déploiement Netlify : l'app Next.js est dans web/.
+[build]
+  base = "web"
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "22"

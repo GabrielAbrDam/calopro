@@ -7,10 +7,14 @@ import { checkLeaseDates, LEASE_RULES, applicationStatusLabel } from "@/lib/form
 import { findDpe, geocode } from "@/lib/gouv";
 import { baseUrl, sendMail } from "@/lib/mail";
 import type { ApplicationStatus, IncidentStatus, StayDocument } from "@/lib/types";
+import { DEMO } from "@/lib/demo";
 
 // ---------- Public ----------
+// En démo (DEMO), un champ vide prend une valeur par défaut : rien ne bloque la visite.
 
-export async function resendStayLink(_prev: string | null, form: FormData) {
+export type ResendState = { message: string; link?: string } | null;
+
+export async function resendStayLink(_prev: ResendState, form: FormData): Promise<ResendState> {
   const email = String(form.get("email") ?? "").trim().toLowerCase();
   const stays = await data.listStays();
   const stay = stays.find((s) => s.tenant_email.toLowerCase() === email && !s.token_revoked);
@@ -19,27 +23,47 @@ export async function resendStayLink(_prev: string | null, form: FormData) {
     await sendMail(email, "Votre lien « Mon séjour »", `Votre nouveau lien : ${baseUrl()}/sejour/${token}\nL'ancien lien ne fonctionne plus.`);
   }
   // Même réponse dans tous les cas : on ne révèle pas qui est locataire.
-  return "Si cette adresse correspond à un bail en cours, un nouveau lien vient de partir. Pensez à vérifier vos indésirables.";
+  const message = "Si cette adresse correspond à un bail en cours, un nouveau lien vient de partir. Pensez à vérifier vos indésirables.";
+  return DEMO ? { message, link: `/sejour/${data.DEMO_TOKENS.stayCorsaire}` } : { message };
 }
 
 export type ApplyState = { error?: string } | null;
 
+function addMonths(iso: string, months: number) {
+  const d = new Date(iso);
+  d.setMonth(d.getMonth() + months);
+  return d.toISOString().slice(0, 10);
+}
+
 export async function submitApplication(_prev: ApplyState, form: FormData): Promise<ApplyState> {
-  const get = (k: string) => String(form.get(k) ?? "").trim();
-  const property = await data.getPropertyBySlug(get("property"));
+  const raw = (k: string) => String(form.get(k) ?? "").trim();
+  const property = await data.getPropertyBySlug(raw("property"));
   if (!property) return { error: "Logement introuvable." };
+
+  const free = await data.nextAvailableDate(property.id);
+  const defaults: Record<string, string> = DEMO
+    ? {
+        start_date: free,
+        end_date: addMonths(raw("start_date") || free, 4),
+        motive: "Mission temporaire",
+        first_name: "Alex",
+        last_name: "Martin",
+        email: "alex.martin@exemple.fr",
+        phone: "06 12 34 56 78",
+        dossier_facile_url: "https://locataire.dossierfacile.logement.gouv.fr/file/demo-alex",
+      }
+    : {};
+  const get = (k: string) => raw(k) || defaults[k] || "";
 
   const dateError = checkLeaseDates(get("start_date"), get("end_date"));
   if (dateError) return { error: dateError };
   if (!LEASE_RULES.motives.includes(get("motive"))) return { error: "Choisissez le motif de votre bail mobilité." };
-  if (form.get("consent") !== "on") return { error: "Cochez le consentement pour envoyer votre dossier." };
+  if (!DEMO && form.get("consent") !== "on") return { error: "Cochez le consentement pour envoyer votre dossier." };
 
-  const dfUrl = get("dossier_facile_url");
-  const files = form
-    .getAll("files")
-    .filter((f): f is File => f instanceof File && f.size > 0);
+  const files = form.getAll("files").filter((f): f is File => f instanceof File && f.size > 0);
+  const dfUrl = raw("dossier_facile_url") || (files.length ? "" : defaults.dossier_facile_url ?? "");
   if (!dfUrl && files.length === 0) return { error: "Ajoutez votre lien DossierFacile ou au moins une pièce." };
-  if (dfUrl && !/^https:\/\/([a-z0-9-]+\.)*dossierfacile\.(logement\.gouv\.)?fr\//.test(dfUrl))
+  if (dfUrl && !DEMO && !/^https:\/\/([a-z0-9-]+\.)*dossierfacile\.(logement\.gouv\.)?fr\//.test(dfUrl))
     return { error: "Le lien doit venir de dossierfacile.logement.gouv.fr." };
   const tooBig = files.find((f) => f.size > 10 * 1024 * 1024);
   if (tooBig) return { error: `« ${tooBig.name} » dépasse 10 Mo.` };
@@ -55,7 +79,7 @@ export async function submitApplication(_prev: ApplyState, form: FormData): Prom
     motive: get("motive"),
     dossier_facile_url: dfUrl || null,
     files: files.map((f) => ({ name: f.name, size: f.size })),
-    message: get("message"),
+    message: raw("message"),
   });
 
   await sendMail(
@@ -71,7 +95,8 @@ export async function submitApplication(_prev: ApplyState, form: FormData): Prom
 export async function reportIncident(_prev: { ok?: boolean; error?: string } | null, form: FormData) {
   const token = String(form.get("token") ?? "");
   const equipmentSlug = String(form.get("equipment") ?? "");
-  const description = String(form.get("description") ?? "").trim();
+  let description = String(form.get("description") ?? "").trim();
+  if (!description && DEMO) description = "Ça ne fonctionne plus depuis ce matin (signalement de démonstration).";
   if (description.length < 10) return { error: "Décrivez le problème en une phrase au moins." };
   const photos = form.getAll("photos").filter((f) => f instanceof File && f.size > 0);
   if (photos.length > 3) return { error: "3 photos au maximum." };
@@ -100,10 +125,16 @@ export async function addArrivalPhotos(token: string, _prev: unknown, form: Form
   if (!stay) return { error: "Lien expiré." };
   const room = String(form.get("room") ?? "Pièce");
   const files = form.getAll("photos").filter((f): f is File => f instanceof File && f.size > 0);
-  if (!files.length) return { error: "Choisissez au moins une photo." };
-  await data.addArrivalPhotos(stay.id, files.map((f) => ({ room, name: f.name })));
+  const names = files.length ? files.map((f) => f.name) : DEMO ? [`${room.toLowerCase().replace(/\W+/g, "-")}-demo.jpg`] : [];
+  if (!names.length) return { error: "Choisissez au moins une photo." };
+  await data.addArrivalPhotos(stay.id, names.map((name) => ({ room, name })));
   revalidatePath(`/sejour/${token}/signaler`);
   return { ok: true };
+}
+
+export async function resetDemoAction() {
+  await data.resetDemo();
+  redirect("/");
 }
 
 // ---------- Propriétaire ----------
@@ -122,14 +153,14 @@ export async function changeApplicationStatus(applicationId: string, status: App
   revalidatePath("/proprio", "layout");
 }
 
-export async function createStayFromApplication(_prev: { error?: string; link?: string; stayId?: string } | null, form: FormData) {
+export async function createStayFromApplication(_prev: { error?: string } | null, form: FormData): Promise<{ error?: string } | null> {
   const app = await data.getApplication(String(form.get("application_id")));
   if (!app || app.status !== "acceptee") return { error: "La candidature doit être acceptée." };
-  const start = String(form.get("start_date"));
-  const end = String(form.get("end_date"));
+  const start = String(form.get("start_date") || app.start_date);
+  const end = String(form.get("end_date") || app.end_date);
   const err = checkLeaseDates(start, end);
   if (err) return { error: err };
-  const code = String(form.get("key_box_code") ?? "").trim();
+  const code = String(form.get("key_box_code") ?? "").trim() || (DEMO ? "1234" : "");
   if (!/^\d{4,6}$/.test(code)) return { error: "Le code de la boîte à clés fait 4 à 6 chiffres." };
 
   const { stay, token } = await data.createStay({
@@ -139,15 +170,15 @@ export async function createStayFromApplication(_prev: { error?: string; link?: 
     tenant_email: app.email,
     start_date: start,
     end_date: end,
-    rent: Number(form.get("rent")),
-    charges: Number(form.get("charges")),
+    rent: Number(form.get("rent")) || (await data.getProperty(app.property_id))?.rent || 0,
+    charges: Number(form.get("charges")) || (await data.getProperty(app.property_id))?.charges || 0,
     key_box_code: code,
     annexes: Object.fromEntries(ANNEXES.map((a) => [a, false])),
   });
   const link = `${baseUrl()}/sejour/${token}`;
   await sendMail(app.email, "Votre lien « Mon séjour »", `Tout votre séjour est ici : ${link}`);
-  revalidatePath("/proprio", "layout");
-  return { link, stayId: stay.id };
+  // On ouvre la page du séjour avec le lien affiché une fois, pour pouvoir le copier.
+  redirect(`/proprio/sejours/${stay.id}?lien=${encodeURIComponent(link)}`);
 }
 
 export async function regenerateLink(stayId: string) {
@@ -166,8 +197,15 @@ export async function toggleAnnex(stayId: string, annex: string) {
 export async function uploadStayDocument(stayId: string, form: FormData) {
   const file = form.get("file");
   const kind = String(form.get("kind")) as StayDocument["kind"];
-  if (!(file instanceof File) || file.size === 0) return;
-  await data.addStayDocument(stayId, kind, file.name);
+  const labels: Record<StayDocument["kind"], string> = {
+    bail: "Bail mobilité signé.pdf",
+    etat_des_lieux: "État des lieux.pdf",
+    inventaire: "Inventaire du mobilier.pdf",
+    diagnostics: "Diagnostics.pdf",
+  };
+  const hasFile = file instanceof File && file.size > 0;
+  if (!hasFile && !DEMO) return;
+  await data.addStayDocument(stayId, kind, hasFile ? (file as File).name : labels[kind]);
   revalidatePath(`/proprio/sejours/${stayId}`);
 }
 

@@ -19,7 +19,7 @@ export type Property = {
   charges: number; // forfait de charges (bail mobilité : pas de régularisation)
   dpe: { label: DpeLabel; ges: DpeLabel; conso: number; source: string };
   walk: { label: string; minutes: number }[];
-  photos: { room: string; tone: string }[];
+  photos: { room: string; tone: string; src?: string }[];
   tourVideo: Video | null;
   parking: string;
   published: boolean;

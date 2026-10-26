@@ -23,7 +23,7 @@ export default async function FicheLogement({ params }: { params: Promise<{ slug
 
       <div className="-mt-1 flex snap-x snap-mandatory gap-2 overflow-x-auto px-4 pb-2" aria-label="Photos">
         {p.photos.slice(0, 10).map((ph, i) => (
-          <PhotoTile key={i} room={ph.room} tone={ph.tone} className="h-60 w-[85%] shrink-0 snap-center" />
+          <PhotoTile key={i} {...ph} className="h-64 w-[85%] shrink-0 snap-center" />
         ))}
       </div>
 
@@ -105,7 +105,7 @@ export default async function FicheLogement({ params }: { params: Promise<{ slug
         <Link href="/conditions" className="block py-2 text-center text-sm text-granit-doux underline underline-offset-4">
           Ai-je droit au bail mobilité ?
         </Link>
-        <div className="sticky bottom-[60px] z-20 -mx-4 bg-gradient-to-t from-ecume via-ecume to-ecume/0 px-4 pt-6 pb-3">
+        <div className="sticky bottom-[112px] z-20 -mx-4 bg-gradient-to-t from-ecume via-ecume to-ecume/0 px-4 pt-6 pb-3">
           <Link href={`/logements/${p.slug}/candidater`} className="btn btn-primaire w-full">
             Candidater pour {p.name}
           </Link>

@@ -10,7 +10,10 @@ export default async function Accueil() {
   return (
     <main className="mx-auto flex min-h-dvh max-w-xl flex-col">
       <section className="relative overflow-hidden bg-emeraude-fonce px-5 pt-12 pb-16 text-white">
-        <svg viewBox="0 0 400 120" className="absolute inset-x-0 bottom-0 w-full text-ecume" preserveAspectRatio="none" aria-hidden>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/photos/saint-malo-plage-remparts.jpg" alt="" className="absolute inset-0 size-full object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-b from-emeraude-fonce/80 via-emeraude-fonce/70 to-emeraude-fonce/90" />
+        <svg viewBox="0 0 400 120" className="absolute inset-x-0 -bottom-px w-full text-ecume" preserveAspectRatio="none" aria-hidden>
           <path d="M0 70 C 60 40, 120 100, 200 70 S 340 40, 400 70 V120 H0z" fill="currentColor" />
         </svg>
         <p className="relative text-sm font-medium text-white/75">Calopro</p>
@@ -22,7 +25,7 @@ export default async function Accueil() {
         </p>
       </section>
 
-      <div className="flex flex-1 flex-col gap-3 px-5 pt-2 pb-10">
+      <div className="flex flex-1 flex-col gap-3 px-5 pt-2 pb-24">
         <Link href="/logements" className="btn btn-primaire min-h-16 w-full text-lg">
           Je souhaite louer
         </Link>

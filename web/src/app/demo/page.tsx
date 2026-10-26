@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { DEMO_TOKENS, listEquipment, listProperties } from "@/lib/data";
 import { Page, PageHeader } from "@/components/ui";
+import { resetDemoAction } from "@/app/actions";
 
 export const metadata = { title: "Démo", robots: { index: false } };
 
@@ -40,7 +41,7 @@ export default async function Demo() {
   return (
     <Page withTabs={false}>
       <PageHeader title="Accès de démonstration" back={{ href: "/", label: "Accueil" }}>
-        Données fictives, dates calculées à partir d'aujourd'hui. Tout revient à zéro au redémarrage du serveur.
+        Données fictives, dates calculées à partir d'aujourd'hui. Vos actions (candidatures, signalements…) sont gardées dans votre navigateur.
       </PageHeader>
       <div className="space-y-5 px-4">
         {groups.map((g) => (
@@ -57,6 +58,13 @@ export default async function Demo() {
             </ul>
           </section>
         ))}
+        <form action={resetDemoAction}>
+          <button className="btn btn-secondaire w-full">Remettre la démo à zéro</button>
+        </form>
+        <p className="text-xs text-granit-doux">
+          Photos d'illustration libres de droits (Wikimedia Commons, rawpixel) : ce ne sont pas les vrais logements. Crédits dans{" "}
+          <a className="underline" href="/photos/CREDITS.md">photos/CREDITS.md</a>.
+        </p>
       </div>
     </Page>
   );

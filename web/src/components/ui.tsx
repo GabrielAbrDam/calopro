@@ -29,15 +29,23 @@ export function PageHeader({
 }
 
 export function Page({ children, withTabs = true }: { children: React.ReactNode; withTabs?: boolean }) {
-  return <main className={`mx-auto min-h-dvh max-w-xl ${withTabs ? "pb-28" : "pb-10"}`}>{children}</main>;
+  return <main className={`mx-auto min-h-dvh max-w-xl ${withTabs ? "pb-40" : "pb-24"}`}>{children}</main>;
 }
 
 export function Card({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return <section className={`rounded-2xl bg-blanc p-4 ${className}`}>{children}</section>;
 }
 
-/** En attendant les vraies photos : un aplat aux couleurs du lieu, étiqueté par pièce. */
-export function PhotoTile({ room, tone, className = "" }: { room: string; tone: string; className?: string }) {
+/** Photo du logement ; à défaut, un aplat aux couleurs du lieu, étiqueté par pièce. */
+export function PhotoTile({ room, tone, src, className = "" }: { room: string; tone: string; src?: string; className?: string }) {
+  if (src)
+    return (
+      <div className={`relative flex items-end overflow-hidden rounded-xl bg-sable ${className}`}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={src} alt={room || "Photo du logement"} loading="lazy" className="absolute inset-0 size-full object-cover" />
+        {room && <span className="relative m-2 rounded-full bg-granit/70 px-2.5 py-1 text-xs font-medium text-white">{room}</span>}
+      </div>
+    );
   return (
     <div
       className={`relative flex items-end overflow-hidden rounded-xl ${className}`}

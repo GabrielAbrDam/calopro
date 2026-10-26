@@ -7,7 +7,14 @@ npm install
 npm run dev
 ```
 
-Puis ouvrir http://localhost:3000/demo : tous les points d'entrée (candidat, locataires, QR, propriétaire) avec les jetons de démo.
+Puis ouvrir http://localhost:3000. La barre du bas « Voir en Candidat / Locataire / Propriétaire » change de rôle ; http://localhost:3000/demo liste tous les points d'entrée.
+
+## Mode démo
+
+Actif par défaut (`NEXT_PUBLIC_DEMO=0` pour le couper) :
+- barre de changement de rôle ;
+- formulaires pré-remplis, aucun champ bloquant ;
+- les actions du visiteur sont gardées dans un cookie : chacun a son bac à sable, même hébergé en serverless (Netlify). Bouton « Remettre la démo à zéro » sur /demo.
 
 ## Où sont les choses
 
@@ -18,4 +25,4 @@ Puis ouvrir http://localhost:3000/demo : tous les points d'entrée (candidat, lo
 - `src/app/actions.ts` : toutes les écritures (server actions)
 - `supabase/schema.sql` : schéma Postgres + RLS, pas encore appliqué
 
-Les mails sont affichés dans la console du serveur (`[mail]`). Les données reviennent à zéro au redémarrage.
+Les mails sont affichés dans la console du serveur (`[mail]`). Photos libres de droits, crédits dans `public/photos/CREDITS.md`.

@@ -2,6 +2,9 @@ import type { Metadata, Viewport } from "next";
 import { Archivo } from "next/font/google";
 import "./globals.css";
 import { SwRegister } from "@/components/sw-register";
+import { RoleSwitcher } from "@/components/role-switcher";
+import { DEMO } from "@/lib/demo";
+import { DEMO_TOKENS } from "@/lib/data";
 
 const archivo = Archivo({
   variable: "--font-archivo",
@@ -29,6 +32,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="fr">
       <body className={`${archivo.variable} antialiased`}>
         {children}
+        {DEMO && <RoleSwitcher tenantHref={`/sejour/${DEMO_TOKENS.stayRocabey}`} />}
         <SwRegister />
       </body>
     </html>

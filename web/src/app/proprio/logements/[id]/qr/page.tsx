@@ -16,7 +16,7 @@ export default async function PlancheQr({ params }: { params: Promise<{ id: stri
     ...equipment.map((e) => ({ label: e.name, sub: e.location, url: `${base}/q/${e.slug}` })),
   ];
   return (
-    <main className="mx-auto max-w-3xl pb-28">
+    <main className="mx-auto max-w-3xl pb-40">
       <div className="no-print">
         <PageHeader title="Planche de QR" kicker={p.name} back={{ href: `/proprio/logements/${p.id}`, label: p.name }}>
           Un QR par équipement, plus un QR pour le livret. Les liens restent valables si vous modifiez une notice : inutile de réimprimer.

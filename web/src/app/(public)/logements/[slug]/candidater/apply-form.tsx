@@ -8,9 +8,14 @@ const STEPS = ["Dates et motif", "Votre dossier", "Envoi"];
 
 export function ApplyForm({ slug, minDate }: { slug: string; minDate: string }) {
   const [step, setStep] = useState(0);
-  const [start, setStart] = useState("");
-  const [end, setEnd] = useState("");
-  const [motive, setMotive] = useState("");
+  // Valeurs par défaut : la démo se parcourt sans rien saisir.
+  const [start, setStart] = useState(minDate);
+  const [end, setEnd] = useState(() => {
+    const d = new Date(minDate);
+    d.setMonth(d.getMonth() + 4);
+    return d.toISOString().slice(0, 10);
+  });
+  const [motive, setMotive] = useState("Mission temporaire");
   const [mode, setMode] = useState<"df" | "files">("df");
   const [localError, setLocalError] = useState<string | null>(null);
   const [state, action, pending] = useActionState(submitApplication, null);
@@ -26,17 +31,7 @@ export function ApplyForm({ slug, minDate }: { slug: string; minDate: string }) 
       if (err) return setLocalError(err);
     }
     if (step === 1) {
-      const f = formRef.current!;
-      const fields = ["first_name", "last_name", "email", "phone"].map((n) => f.elements.namedItem(n) as HTMLInputElement);
-      const bad = fields.find((x) => !x.checkValidity());
-      if (bad) {
-        bad.reportValidity();
-        return;
-      }
-      const df = (f.elements.namedItem("dossier_facile_url") as HTMLInputElement).value;
-      const files = (f.elements.namedItem("files") as HTMLInputElement).files;
-      if (mode === "df" && !df) return setLocalError("Collez votre lien de partage DossierFacile.");
-      if (mode === "files" && (!files || files.length === 0)) return setLocalError("Ajoutez au moins une pièce.");
+      const files = (formRef.current!.elements.namedItem("files") as HTMLInputElement).files;
       if (files && [...files].some((x) => x.size > 10 * 1024 * 1024)) return setLocalError("Chaque pièce doit faire 10 Mo au plus.");
     }
     setStep((s) => s + 1);
@@ -53,8 +48,6 @@ export function ApplyForm({ slug, minDate }: { slug: string; minDate: string }) 
         // Soumission manuelle : empêche l'envoi avant la dernière étape et évite que React vide le formulaire.
         e.preventDefault();
         if (step < 2) return next();
-        const consent = e.currentTarget.elements.namedItem("consent") as HTMLInputElement;
-        if (!consent.checked) return setLocalError("Cochez le consentement pour envoyer votre dossier.");
         setLocalError(null);
         const fd = new FormData(e.currentTarget);
         startTransition(() => action(fd));
@@ -109,20 +102,20 @@ export function ApplyForm({ slug, minDate }: { slug: string; minDate: string }) 
         <div className="grid grid-cols-2 gap-3">
           <label>
             <span className="mb-1 block font-semibold">Prénom</span>
-            <input name="first_name" required autoComplete="given-name" className="champ" />
+            <input name="first_name" autoComplete="given-name" defaultValue="Alex" className="champ" />
           </label>
           <label>
             <span className="mb-1 block font-semibold">Nom</span>
-            <input name="last_name" required autoComplete="family-name" className="champ" />
+            <input name="last_name" autoComplete="family-name" defaultValue="Martin" className="champ" />
           </label>
         </div>
         <label className="block">
           <span className="mb-1 block font-semibold">Mail</span>
-          <input name="email" type="email" required autoComplete="email" className="champ" />
+          <input name="email" type="email" autoComplete="email" defaultValue="alex.martin@exemple.fr" className="champ" />
         </label>
         <label className="block">
           <span className="mb-1 block font-semibold">Téléphone</span>
-          <input name="phone" type="tel" required autoComplete="tel" className="champ" />
+          <input name="phone" type="tel" autoComplete="tel" defaultValue="06 12 34 56 78" className="champ" />
         </label>
 
         <div role="radiogroup" aria-label="Type de dossier" className="grid grid-cols-2 gap-1 rounded-full bg-sable p-1">
@@ -147,7 +140,7 @@ export function ApplyForm({ slug, minDate }: { slug: string; minDate: string }) 
         <div hidden={mode !== "df"}>
           <label className="block">
             <span className="mb-1 block font-semibold">Lien de partage DossierFacile</span>
-            <input name="dossier_facile_url" type="url" placeholder="https://locataire.dossierfacile.logement.gouv.fr/file/…" className="champ" />
+            <input name="dossier_facile_url" type="url" defaultValue="https://locataire.dossierfacile.logement.gouv.fr/file/demo-alex" className="champ" />
           </label>
           <p className="mt-1 text-sm text-granit-doux">
             Pas encore de dossier ? Créez-le gratuitement sur{" "}
@@ -181,7 +174,7 @@ export function ApplyForm({ slug, minDate }: { slug: string; minDate: string }) 
           <textarea name="message" rows={4} className="champ" placeholder="Votre situation, votre employeur ou école, vos horaires d'arrivée…" />
         </label>
         <label className="flex gap-3 rounded-xl bg-blanc p-3 text-sm">
-          <input type="checkbox" name="consent" required className="mt-0.5 size-5 shrink-0 accent-emeraude" />
+          <input type="checkbox" name="consent" defaultChecked className="mt-0.5 size-5 shrink-0 accent-emeraude" />
           <span>
             J'accepte que mes données servent uniquement à étudier cette candidature. Les pièces d'un dossier refusé sont supprimées après 3 mois ;
             je peux demander leur export ou leur suppression à tout moment.
