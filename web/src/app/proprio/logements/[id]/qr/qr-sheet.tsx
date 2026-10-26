@@ -1,20 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import QRCode from "qrcode";
 import { IconPrinter } from "@/components/icons";
 
-type Item = { label: string; sub: string; url: string };
+type Item = { label: string; sub: string; url: string; svg: string };
 
 export function QrSheet({ title, items }: { title: string; items: Item[] }) {
-  const [svgs, setSvgs] = useState<string[]>([]);
-
-  useEffect(() => {
-    Promise.all(
-      items.map((i) => QRCode.toString(i.url, { type: "svg", margin: 0, errorCorrectionLevel: "M", color: { dark: "#22303a", light: "#ffffff" } })),
-    ).then(setSvgs);
-  }, [items]);
-
   return (
     <>
       <div className="no-print px-4 pb-4">
@@ -26,9 +16,9 @@ export function QrSheet({ title, items }: { title: string; items: Item[] }) {
       <section className="mx-4 bg-white p-6 print:m-0 print:p-0">
         <h2 className="titre mb-4 text-3xl">{title}</h2>
         <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 print:grid-cols-3">
-          {items.map((it, i) => (
+          {items.map((it) => (
             <li key={it.url} className="break-inside-avoid rounded-xl border-2 border-dashed border-trait p-3 text-center">
-              <div className="mx-auto aspect-square w-full max-w-[150px]" dangerouslySetInnerHTML={{ __html: svgs[i] ?? "" }} />
+              <div className="mx-auto aspect-square w-full max-w-[150px]" dangerouslySetInnerHTML={{ __html: it.svg }} />
               <p className="mt-2 font-bold leading-tight">{it.label}</p>
               <p className="text-xs text-granit-doux">{it.sub}</p>
               <p className="mt-1 text-[0.65rem] text-granit-doux">Scannez pour la notice</p>

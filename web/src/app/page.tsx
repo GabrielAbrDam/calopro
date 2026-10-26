@@ -14,7 +14,7 @@ export default async function Accueil() {
         <img src="/photos/saint-malo-plage-remparts.jpg" alt="" className="absolute inset-0 size-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-b from-emeraude-fonce/80 via-emeraude-fonce/70 to-emeraude-fonce/90" />
         <svg viewBox="0 0 400 120" className="absolute inset-x-0 -bottom-px w-full text-ecume" preserveAspectRatio="none" aria-hidden>
-          <path d="M0 70 C 60 40, 120 100, 200 70 S 340 40, 400 70 V120 H0z" fill="currentColor" />
+          <path d="M0 70 C 60 40, 120 100, 200 70 S 340 40, 400 70 V121 H0z" fill="currentColor" />
         </svg>
         <p className="relative text-sm font-medium text-white/75">Calopro</p>
         <h1 className="titre relative mt-3 text-[3.4rem]">
